@@ -1,4 +1,21 @@
-# Vercel installs Python dependencies from the project-root requirements.txt.
-# The backend pins its dependencies in backend/requirements.txt; keep a single
-# source of truth.
--r backend/requirements.txt
+# Vercel installs Python dependencies from this project-root file. Keep it in
+# sync with backend/requirements.txt (which the Docker image uses) — Vercel's
+# builder does not support "-r include" lines.
+fastapi>=0.115
+uvicorn>=0.34
+gunicorn>=22.0
+sqlalchemy>=2.0.40
+psycopg2-binary>=2.9.10
+alembic>=1.14
+pydantic>=2.10
+pydantic-settings>=2.7
+email-validator>=2.2
+PyJWT>=2.10
+bcrypt>=4.2
+httpx>=0.28
+numpy>=2.3
+xgboost>=3.0
+joblib>=1.4
+celery>=5.4
+redis>=5.0
+pytest>=8.3
