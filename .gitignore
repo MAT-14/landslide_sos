@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Local databases (dev SQLite, celery broker)
+*.db
+*.sqlite3
+
 # API keys (Mapbox token, etc.)
 .env
 .env.*
