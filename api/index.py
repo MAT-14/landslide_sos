@@ -70,4 +70,11 @@ try:
 except Exception:  # never crash the function; the app still starts and logs the error
     logging.getLogger("vercel.bootstrap").exception("DB bootstrap failed")
 
+import app.middleware  # noqa: E402,F401 — pin sub-packages so Vercel bundles them
+import app.models  # noqa: E402,F401
+import app.routers  # noqa: E402,F401
+import app.schemas  # noqa: E402,F401
+import app.services  # noqa: E402,F401
+import app.tasks  # noqa: E402,F401
+
 from app.main import app  # noqa: E402

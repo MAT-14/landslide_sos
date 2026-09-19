@@ -3,7 +3,7 @@
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
-      "excludeFiles": "backend/{tests,data,models,__pycache__}/**"
+      "excludeFiles": "backend/tests/**,backend/data/**,backend/__pycache__/**"
     }
   },
   "rewrites": [
