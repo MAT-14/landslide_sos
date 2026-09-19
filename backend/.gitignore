@@ -16,8 +16,9 @@ __pycache__/
 # Downloaded DEM cache (regenerable, don't commit)
 data/dem/
 
-# Trained model artifacts (regenerable via scripts/train_model.py)
-models/
+# Trained model artifacts (regenerable via scripts/train_model.py) only.
+# Anchored with /* so the `app/models` Python package is NOT ignored.
+models/*
 
 # Python venv
 .venv/
