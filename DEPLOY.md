@@ -132,6 +132,56 @@ docker compose up -d --scale celery-worker=2
 | Model not found | Train first: `docker compose exec backend python scripts/train_model.py` |
 | SMS not sending | Check `SMS_PROVIDER` in `.env`; `mock` logs to console |
 
+## Hosting on Vercel (serverless) + Neon (Postgres) — free, no card
+
+The frontend already deploys on Vercel. The FastAPI backend can live in the
+same repo as a file-based Python function (`api/index.py`), talking to a free
+Neon Postgres — both card-free. There are no background Celery workers: tasks
+run eager/inline (enforced in `celery_app.py`), so scheduled recomputes don't
+run automatically (see trade-offs below).
+
+One-time setup:
+1. **Neon** — create a free project at console.neon.tech (GitHub login, no
+   credit card). Copy the **pooled** connection string and export it:
+   ```powershell
+   $env:DATABASE_URL="postgresql://<user>:<pass>@ep-xxx-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
+   ```
+2. **Migrate + seed** against Neon once (from `backend/`):
+   ```powershell
+   Set-Location backend
+   $env:DATABASE_URL="postgresql://<user>:<pass>@ep-xxx-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
+   & .venv\Scripts\python.exe -m alembic upgrade head
+   & .venv\Scripts\python.exe scripts/seed_data.py
+   & .venv\Scripts\python.exe scripts/seed_demo_risk.py
+   ```
+   (The demo seed also creates `admin@landslidesos.in / admin123456`.)
+3. **Vercel backend** — import this repo as a second Vercel project (or CLI
+   `vercel link` + `vercel --prod`). Set these project env vars:
+   | Variable | Value |
+   |----------|-------|
+   | `DATABASE_URL` | the Neon pooled URL (`?sslmode=require`) |
+   | `SECRET_KEY` | `python -c "import secrets; print(secrets.token_hex(32))"` |
+   | `ENVIRONMENT` | `production` |
+   | `DEBUG` | `false` |
+   | `AUTO_CREATE_TABLES` | `false` |
+   | `CORS_ALLOW_ALL` | `false` |
+   | `CORS_ORIGINS` | `["https://landslide-sos.vercel.app"]` |
+   | `SMS_PROVIDER` | `msg91` (empty `MSG91_AUTH_KEY` → simulation) |
+4. **Vercel frontend** — add `VITE_API_BASE=https://<backend-project>.vercel.app/api/v1` and redeploy.
+
+`vercel.json` routes `/api/(.*)` to the Python function and everything else to
+the SPA; the Python runtime installs deps from the root `requirements.txt`
+(which just imports `backend/requirements.txt`).
+
+Trade-offs vs Render/Docker hosting:
+- **Cold start** includes the `xgboost` import (app imports `app.services.model.trainer`)
+  → first request after idle takes a few seconds.
+- **No scheduler**: the Celery Beat jobs (30-min risk recompute, hourly IMD
+  ingest) don't run; trigger them via the API or recompute endpoint if needed.
+- **IMD API** is IP-whitelisted, so live IMD fetch won't work from Vercel's
+  shared IPs — the simulated `SIM-*` readings path is the default.
+- **Neon Free**: 0.5 GB storage, 100 CU-hr/month, scales to zero after 5 min.
+
 ## Hosting on Render (managed)
 
 The repo ships a `render.yaml` Blueprint so the backend can run as a hosted
