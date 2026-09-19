@@ -1,9 +1,9 @@
-# Vercel installs Python dependencies from this project-root file. Keep it in
-# sync with backend/requirements.txt (which the Docker image uses) — Vercel's
-# builder does not support "-r include" lines.
+# Vercel installs Python dependencies from this project-root file into the
+# serverless function. It is intentionally a SUBSET of backend/requirements.txt
+# (which the Docker image uses): heavy/dev-only packages are omitted so the
+# bundle stays under Vercel's 500 MB function limit. xgboost, gunicorn, uvicorn
+# and pytest are installed only by backend/requirements.txt (Docker/local).
 fastapi>=0.115
-uvicorn>=0.34
-gunicorn>=22.0
 sqlalchemy>=2.0.40
 psycopg2-binary>=2.9.10
 alembic>=1.14
@@ -14,8 +14,6 @@ PyJWT>=2.10
 bcrypt>=4.2
 httpx>=0.28
 numpy>=2.3
-xgboost>=3.0
 joblib>=1.4
 celery>=5.4
 redis>=5.0
-pytest>=8.3

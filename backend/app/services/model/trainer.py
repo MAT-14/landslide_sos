@@ -16,7 +16,6 @@ from typing import Any
 
 import joblib
 import numpy as np
-import xgboost as xgb
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -233,6 +232,7 @@ def train(
     else:
         model_type = "xgboost"
         model_name = "XGBoost"
+        import xgboost as xgb  # lazy: not installed on the Vercel function bundle
         params = {
             "max_depth": 6,
             "eta": 0.08,
