@@ -16,6 +16,9 @@ dist-ssr
 .env
 .env.*
 
+# Scratch artifacts (personally generated, not part of the project)
+ERRORS.pdf
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

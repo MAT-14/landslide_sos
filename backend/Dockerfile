@@ -20,7 +20,8 @@ FROM base AS production
 RUN addgroup --system app && \
     adduser --system --ingroup app app && \
     mkdir -p /app/data /app/models && \
-    chown -R app:app /app
+    chown -R app:app /app && \
+    chmod +x /app/docker-entrypoint.sh
 
 ENV HOME=/app
 
@@ -28,10 +29,6 @@ USER app
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "gunicorn app.main:app \
-     -w 4 \
-     -k uvicorn.workers.UvicornWorker \
-     -b 0.0.0.0:${PORT:-8000} \
-     --access-logfile - \
-     --error-logfile - \
-     --log-level info"]
+# Runs alembic migrations (+ idempotent demo seed unless AUTO_SEED=false),
+# then starts gunicorn. No manual shell needed on Render.
+CMD ["./docker-entrypoint.sh"]

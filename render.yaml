@@ -1,7 +1,8 @@
 # Render Blueprint for LandslideSOS
 # Deploys: managed Postgres + the FastAPI backend (web).
-# Migrations/seed run manually via the web service Shell (Render Blueprints
-# don't support one-off "job" services). See DEPLOY.md -> "Hosting on Render".
+# Migrations and the idempotent demo seed run automatically at container
+# startup (backend/docker-entrypoint.sh), so no Shell/job service is needed
+# on the free tier. See DEPLOY.md -> "Hosting on Render".
 #
 # Defaults are demo-safe: SMS/IMD/DEM providers run in SIMULATION mode,
 # Celery runs eager (no worker needed), CORS allows the Vercel SPA.
@@ -27,6 +28,8 @@ services:
         value: "false"
       - key: AUTO_CREATE_TABLES
         value: "false"
+      - key: AUTO_SEED
+        value: "true"
       - key: CORS_ALLOW_ALL
         value: "false"
       - key: CORS_ORIGINS

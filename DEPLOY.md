@@ -143,14 +143,11 @@ One-time deploy:
 3. Render creates two resources:
    - `landslideos-db` — managed PostgreSQL (free tier).
    - `landslideos-api` — web service (Docker → gunicorn), `PORT` handled by Render.
-   - (Render Blueprints don't support one-off `job` services, so migration/seed
-     has to run manually in the web service Shell — see next step.)
-4. Wait for the web service to deploy, then open it → **Shell** and run:
-   ```bash
-   python -m alembic upgrade head
-   python scripts/seed_data.py
-   python scripts/seed_demo_risk.py --reset-alerts --reset-reports
-   ```
+4. Wait for the web service to deploy. On container startup it runs
+   `python -m alembic upgrade head` and — unless `AUTO_SEED=false` — the
+   idempotent demo seed (`scripts/seed_data.py` + `scripts/seed_demo_risk.py`),
+   so no Shell access is required. Check the service logs for
+   "Applying DB migrations" / "Seeding demo data".
 5. Note the web-service URL, e.g. `https://landslideos-api.onrender.com`.
 
 Point the Vercel frontend at it:
@@ -167,7 +164,7 @@ Demo-safe defaults on Render (override in service env vars to use real data):
 | `SMS_PROVIDER` / `MSG91_AUTH_KEY` | `msg91` / empty → simulation | your msg91 key |
 | `IMD_API_KEY` | empty → simulated SIM-* readings | whitelisted IMD key |
 | `OPENTOPOGRAPHY_API_KEY` | empty | your OT key |
-| `CELERY_TASK_ALWAYS_EAGER` | `true` → tasks run inline | `false` + a worker/Redis |
+| `CELERY_TASK_ALWAYS_EAGER` | `true` → tasks run inline (enforced in `celery_app.py`) | run a worker + Redis |
 | `CORS_ORIGINS` | localhost + `https://landslide-sos.vercel.app` | your frontend origin(s) |
 
 Free-tier caveats:
